@@ -91,8 +91,8 @@ public abstract class BaseStackLayout : BaseLayout
     }
 }
 
-// arranges children at their X/Y relative to the layout's origin; Fill takes the box size,
-// manual sizes are left alone and may overflow
+// arranges children at their X/Y relative to the layout's origin; Fill takes the box size
+// minus the child's margin, manual sizes are left alone and may overflow
 public class ManualLayout : BaseLayout
 {
     public override void Arrange()
@@ -102,9 +102,10 @@ public class ManualLayout : BaseLayout
 
         foreach (var child in Children)
         {
-            int width = child.Width == Fill ? boxW : child.Width;
-            int height = child.Height == Fill ? boxH : child.Height;
-            Position(child, originX + child.X, originY + child.Y, width, height);
+            Margin margin = child.Margin;
+            int width = child.Width == Fill ? boxW - margin.Left - margin.Right : child.Width;
+            int height = child.Height == Fill ? boxH - margin.Top - margin.Bottom : child.Height;
+            Position(child, originX + child.X + margin.Left, originY + child.Y + margin.Top, width, height);
         }
     }
 }

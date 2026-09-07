@@ -59,6 +59,11 @@ public class Window : IDisposable, ISizeProvider
         // avoid this issue by always explicitly showing the window twice. Idk man.
         NativeBindings.ShowWindow(Hwnd, NativeBindings.SW_SHOWNORMAL);
         NativeBindings.ShowWindow(Hwnd, NativeBindings.SW_SHOWNORMAL);
+        if (Application.DarkModeEnabled)
+        {
+            int on = 1;
+            NativeBindings.DwmSetWindowAttribute(Hwnd, NativeBindings.DWMWA_USE_IMMERSIVE_DARK_MODE, ref on, sizeof(int));
+        }
     }
 
     public string Title

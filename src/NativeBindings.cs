@@ -156,6 +156,14 @@ internal static partial class NativeBindings
     [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16)]
     internal static partial nint GetModuleHandleW(string moduleName);
 
+    [LibraryImport("dwmapi.dll")]
+    internal static partial int DwmSetWindowAttribute(nint hwnd, int attribute, ref int value, int sizeOfValue);
+
+    [LibraryImport("uxtheme.dll", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial int SetWindowTheme(nint hwnd, string subAppName, string subIdListName);
+
+    internal const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
     [LibraryImport("user32.dll", EntryPoint = "RegisterClassExW")]
     internal static partial ushort RegisterClassExW(in WNDCLASSEXW windowClass);
 

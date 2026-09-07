@@ -9,6 +9,7 @@ public class Example
     {
         // All optional, but make it look better
         Application.EnableHiDPISupportForCurrentProcess();
+        //Application.EnableDarkMode(); // you know you want it (only title bar and scrollbars though, rest is on you)
         Application.EnableVisualStylesForCurrentThread();
 
         // Load an Icon - expects valid .ico data, no error handling
@@ -40,9 +41,7 @@ public class Example
         // A ListBox with some selection logic
         var label = new Label("Select an item!");
         var list = layout.Children.Add(new ListBox() { Height = BaseLayout.Fill, Font = fontMono });
-        list.Items.Add("Item 1");
-        list.Items.Add("Item 2");
-        list.Items.Add("Item 3");
+        for (int i = 0; i < 12; i++) list.Items.Add($"Item {i + 1}");
         list.OnSelectedIndexChanged += (_, i) => label.Text = i >= 0 ? $"Selected: {list.Items[i]}" : "Select an item!";
         layout.Children.Add(label);
 

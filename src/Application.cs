@@ -26,6 +26,19 @@ public static class Application
     private static unsafe readonly nint _timerProc =
         (nint)(delegate* unmanaged<nint, uint, nuint, uint, void>)&TimerProc;
 
+    /// <summary>Whether EnableDarkMode has run.</summary>
+    public static bool DarkModeEnabled { get; private set; }
+
+    /// <summary>
+    /// Opts new windows into Windows dark mode: dark title bars and dark scrollbars on ListBoxes.
+    /// Manual and opt-in; call before creating windows. Themed buttons, checkboxes, and message
+    /// box contents stay light (that requires owner-draw).
+    /// </summary>
+    public static void EnableDarkMode()
+    {
+        DarkModeEnabled = true;
+    }
+
     // DIP to pixel factor; 1 until EnableHiDPISupportForCurrentProcess runs
     internal static float Scale = 1f;
 
@@ -113,10 +126,7 @@ public static class Application
     internal static bool ShowMessageBox(nint owner, string title, string message, Icon icon, MessageBoxIcon image, bool canCancel)
     {
         if (icon != null)
-        {
-            _pendingIcon = icon;
             unsafe { _hook = NativeBindings.SetWindowsHookExW(NativeBindings.WH_CBT, (nint)(delegate* unmanaged<int, nint, nint, nint>)&CbtProc, 0, NativeBindings.GetCurrentThreadId()); }
-        }
         uint buttons = canCancel ? NativeBindings.MB_OKCANCEL : NativeBindings.MB_OK;
         int result = NativeBindings.MessageBoxW(owner, message, title, buttons | (uint)image);
         if (_hook != 0)

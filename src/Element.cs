@@ -253,6 +253,7 @@ public class ListBox : ColorableElement
 
     internal override void OnAttached()
     {
+        if (Application.DarkModeEnabled) NativeBindings.SetWindowTheme(Hwnd, "DarkMode_Explorer", null);
         Items.Added += OnItemAdded;
         Items.Removed += OnItemRemoved;
         Items.Set += OnItemSet;

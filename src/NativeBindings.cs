@@ -131,6 +131,7 @@ internal static partial class NativeBindings
     internal const int ICC_BAR_CLASSES = 0x0004;
     internal const int ICC_PROGRESS_CLASSES = 0x0020;
 
+    internal const uint MB_OK = 0x00000000;
     internal const uint MB_OKCANCEL = 0x00000001;
     internal const uint MB_ICONINFORMATION = 0x00000040;
     internal const int IDOK = 1;

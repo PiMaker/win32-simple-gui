@@ -99,16 +99,18 @@ public static class Application
 
     /// <summary>
     /// Shows a message box with the specified title, message, optional icon, and standard system image.
+    /// When canCancel is false, only an OK button is shown.
     /// </summary>
     /// <returns>True if the user clicked OK; otherwise, false.</returns>
-    public static bool MessageBox(string title, string message, Icon icon = null, MessageBoxIcon image = MessageBoxIcon.None)
+    public static bool MessageBox(string title, string message, Icon icon = null, MessageBoxIcon image = MessageBoxIcon.None, bool canCancel = true)
     {
         if (icon != null)
         {
             _pendingIcon = icon;
             unsafe { _hook = NativeBindings.SetWindowsHookExW(NativeBindings.WH_CBT, (nint)(delegate* unmanaged<int, nint, nint, nint>)&CbtProc, 0, NativeBindings.GetCurrentThreadId()); }
         }
-        int result = NativeBindings.MessageBoxW(0, message, title, NativeBindings.MB_OKCANCEL | (uint)image);
+        uint buttons = canCancel ? NativeBindings.MB_OKCANCEL : NativeBindings.MB_OK;
+        int result = NativeBindings.MessageBoxW(0, message, title, buttons | (uint)image);
         if (_hook != 0)
         {
             NativeBindings.UnhookWindowsHookEx(_hook);

@@ -32,7 +32,7 @@ public class Example
         // TextBox, Button, and MessageBox helper - we can even put our Icon on the MessageBox
         var box = layout.Children.Add(new TextBox());
         var button = layout.Children.Add(new Button("Click Me") { Margin = new(horizontal: 16, vertical: 4) });
-        button.OnClick += _ => Application.MessageBox("Button Clicked", $"You clicked the button! Input: {box.Text}", icon, MessageBoxIcon.Information);
+        button.OnClick += _ => Application.MessageBox("Button Clicked", $"You clicked the button! Input: {box.Text}", icon, MessageBoxIcon.Information, canCancel: false);
 
         // A ListBox with some selection logic
         var label = new Label("Select an item!");

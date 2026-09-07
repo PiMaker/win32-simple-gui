@@ -185,7 +185,9 @@ public class Window : IDisposable, ISizeProvider
         _elements.Add(element);
         if (element is BaseLayout layout)
         {
-            layout.Parent = this;
+            // the root layout hangs off the window; nested layouts get their Parent
+            // from the layout that contains them
+            if (layout.Parent == null) layout.Parent = this;
             layout.Children.Added += Attach;
             layout.Children.Removed += Detach;
             layout.Children.Set += OnChildSet;
@@ -320,6 +322,7 @@ public class Window : IDisposable, ISizeProvider
         _width = (int)Math.Round(clientWidth / Application.Scale);
         _height = (int)Math.Round(clientHeight / Application.Scale);
         OnResize?.Invoke();
+        if (AutoLayoutOnResize) Arrange();
     }
 
     private void OnDestroyed()

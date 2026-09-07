@@ -9,12 +9,18 @@ public abstract class BaseLayout : Element, ISizeProvider
 
     public abstract void Arrange();
 
+    protected BaseLayout()
+    {
+        // a nested layout arranges inside the box of the layout that contains it
+        Children.Added += element => { if (element is BaseLayout layout) layout.Parent = this; };
+    }
+
     // box this layout arranges inside; a root layout insets itself by its own margin,
-    // a nested one was positioned by its parent (own margin included)
+    // a nested one uses the box its parent assigned (own margin already applied there)
     protected (int X, int Y, int Width, int Height) Box()
     {
         if (Parent is BaseLayout)
-            return (AbsoluteX, AbsoluteY, Parent.ClientWidth, Parent.ClientHeight);
+            return (AbsoluteX, AbsoluteY, AbsoluteWidth, AbsoluteHeight);
         return (Margin.Left, Margin.Top,
             Parent.ClientWidth - Margin.Left - Margin.Right,
             Parent.ClientHeight - Margin.Top - Margin.Bottom);

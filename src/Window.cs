@@ -37,7 +37,7 @@ public class Window : IDisposable, ISizeProvider
         _height = height;
         _self = GCHandle.Alloc(this);
         Hwnd = NativeBindings.CreateWindowExW(0, ClassName, title,
-            NativeBindings.WS_OVERLAPPEDWINDOW | NativeBindings.WS_VISIBLE | NativeBindings.WS_CLIPCHILDREN,
+            NativeBindings.WS_OVERLAPPEDWINDOW | NativeBindings.WS_CLIPCHILDREN,
             NativeBindings.CW_USEDEFAULT, NativeBindings.CW_USEDEFAULT,
             Application.ScaleDip(width), Application.ScaleDip(height),
             0, 0, NativeBindings.GetModuleHandleW(null), GCHandle.ToIntPtr(_self));
@@ -53,6 +53,12 @@ public class Window : IDisposable, ISizeProvider
         _rootLayout = new ManualLayout();
         Attach(_rootLayout);
         ApplyIcon();
+
+        // Windows can replace a process's first ShowWindow command with STARTUPINFO.wShowWindow.
+        // Users of this library may be running under some cursed embedded setup or whatever, so
+        // avoid this issue by always explicitly showing the window twice. Idk man.
+        NativeBindings.ShowWindow(Hwnd, NativeBindings.SW_SHOWNORMAL);
+        NativeBindings.ShowWindow(Hwnd, NativeBindings.SW_SHOWNORMAL);
     }
 
     public string Title

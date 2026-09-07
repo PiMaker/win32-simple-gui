@@ -143,6 +143,7 @@ internal static partial class NativeBindings
 
     internal const int SW_MINIMIZE = 6;
     internal const int SW_MAXIMIZE = 3;
+    internal const int SW_SHOWNORMAL = 1;
     internal const int SW_RESTORE = 9;
 
     internal const nint IDC_ARROW = 32512;

@@ -8,10 +8,20 @@ public class ObservableList<T> : IEnumerable<T>
 
     public Action<T> Added;
     public Action<T> Removed;
+    public Action<int, T, T> Set;
 
     public int Count => _items.Count;
 
-    public T this[int index] => _items[index];
+    public T this[int index]
+    {
+        get => _items[index];
+        set
+        {
+            T old = _items[index];
+            _items[index] = value;
+            Set?.Invoke(index, old, value);
+        }
+    }
 
     public TItem Add<TItem>(TItem item) where TItem : T
     {

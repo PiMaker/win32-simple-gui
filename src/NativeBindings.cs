@@ -116,6 +116,7 @@ internal static partial class NativeBindings
     internal const nint BST_CHECKED = 1;
 
     internal const uint LB_ADDSTRING = 0x0180;
+    internal const uint LB_INSERTSTRING = 0x0143;
     internal const uint LB_RESETCONTENT = 0x0184;
     internal const uint LB_SETCURSEL = 0x0186;
     internal const uint LB_GETCURSEL = 0x0188;

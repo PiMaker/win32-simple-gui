@@ -182,6 +182,7 @@ public class Window : IDisposable, ISizeProvider
             layout.Parent = this;
             layout.Children.Added += Attach;
             layout.Children.Removed += Detach;
+            layout.Children.Set += OnChildSet;
             foreach (var child in layout.Children) Attach(child);
             return;
         }
@@ -201,6 +202,7 @@ public class Window : IDisposable, ISizeProvider
         {
             layout.Children.Added -= Attach;
             layout.Children.Removed -= Detach;
+            layout.Children.Set -= OnChildSet;
             foreach (var child in layout.Children) Detach(child);
             return;
         }
@@ -211,6 +213,12 @@ public class Window : IDisposable, ISizeProvider
             element.Hwnd = 0;
         }
         element.OnDetached();
+    }
+
+    private void OnChildSet(int index, Element oldElement, Element newElement)
+    {
+        Detach(oldElement);
+        Attach(newElement);
     }
 
     private nint CreateControl(Element element)
@@ -320,6 +328,7 @@ public class Window : IDisposable, ISizeProvider
             {
                 layout.Children.Added -= Attach;
                 layout.Children.Removed -= Detach;
+                layout.Children.Set -= OnChildSet;
             }
             element.OnDetached();
         }
@@ -344,7 +353,7 @@ public class Window : IDisposable, ISizeProvider
             case TextBox textBox when code == NativeBindings.EN_CHANGE:
                 textBox.OnTextChanged?.Invoke(textBox, textBox.Text);
                 break;
-            case ListBox listBox when code == NativeBindings.LBN_SELCHANGE:
+            case ListBox listBox when code == NativeBindings.LBN_SELCHANGE && !listBox.SuppressSelectionEvent:
                 listBox.OnSelectedIndexChanged?.Invoke(listBox, listBox.SelectedIndex);
                 break;
         }

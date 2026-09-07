@@ -249,10 +249,13 @@ public class ListBox : ColorableElement
 
     public Action<ListBox, int> OnSelectedIndexChanged;
 
+    internal bool SuppressSelectionEvent;
+
     internal override void OnAttached()
     {
         Items.Added += OnItemAdded;
         Items.Removed += OnItemRemoved;
+        Items.Set += OnItemSet;
         foreach (var item in Items) NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, item);
     }
 
@@ -260,6 +263,7 @@ public class ListBox : ColorableElement
     {
         Items.Added -= OnItemAdded;
         Items.Removed -= OnItemRemoved;
+        Items.Set -= OnItemSet;
     }
 
     private void OnItemAdded(string item) => NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, item);
@@ -268,5 +272,16 @@ public class ListBox : ColorableElement
     {
         int index = Items.IndexOf(item);
         if (index >= 0) NativeBindings.SendMessage(Hwnd, NativeBindings.LB_DELETESTRING, index);
+    }
+
+    // delete+insert repaints only the affected row; keep the selection without firing selection events
+    private void OnItemSet(int index, string _, string item)
+    {
+        int selected = SelectedIndex;
+        SuppressSelectionEvent = true;
+        NativeBindings.SendMessage(Hwnd, NativeBindings.LB_DELETESTRING, index);
+        NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_INSERTSTRING, 0, item);
+        if (selected == index) NativeBindings.SendMessage(Hwnd, NativeBindings.LB_SETCURSEL, index);
+        SuppressSelectionEvent = false;
     }
 }

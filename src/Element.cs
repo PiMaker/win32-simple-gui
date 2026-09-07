@@ -104,12 +104,19 @@ public class Panel : ColorableElement
 
 public class Label : ColorableElement
 {
-    public Label(string text = "")
+    public Label(string text = "", bool centerHorizontally = false, bool centerVertically = false)
     {
         TextValue = text;
         Width = 200;
         Height = 20;
+
+        // can only be set at creation time
+        CenterHorizontally = centerHorizontally;
+        CenterVertically = centerVertically;
     }
+
+    public bool CenterHorizontally { get; }
+    public bool CenterVertically { get; }
 
     public string Text { get => GetText(); set => SetText(value); }
 }

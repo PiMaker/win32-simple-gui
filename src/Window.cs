@@ -259,8 +259,10 @@ public class Window : IDisposable, ISizeProvider
                 className = "STATIC";
                 style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE | NativeBindings.WS_CLIPSIBLINGS;
                 break;
-            case Label:
+            case Label label:
                 className = "STATIC";
+                if (label.CenterHorizontally) style |= NativeBindings.SS_CENTER;
+                if (label.CenterVertically) style |= NativeBindings.SS_CENTERIMAGE;
                 break;
             case Button:
                 className = "BUTTON";

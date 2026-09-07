@@ -107,6 +107,8 @@ internal static partial class NativeBindings
     internal static readonly nint INVALID_HANDLE_VALUE = new nint(-1);
 
     internal const uint BS_AUTOCHECKBOX = 0x00000003;
+    internal const uint SS_CENTER = 0x00000001;
+    internal const uint SS_CENTERIMAGE = 0x00000200;
     internal const uint ES_AUTOHSCROLL = 0x00000080;
     internal const uint LBS_NOTIFY = 0x0001;
 

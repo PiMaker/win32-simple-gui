@@ -83,6 +83,7 @@ internal static partial class NativeBindings
     internal const uint WS_TABSTOP = 0x00010000;
     internal const uint WS_OVERLAPPEDWINDOW = 0x00CF0000;
     internal const uint WS_EX_CLIENTEDGE = 0x00000200;
+    internal const uint WS_EX_COMPOSITED = 0x02000000;
     internal const uint WS_MAXIMIZEBOX = 0x00010000;
     internal const uint WS_MINIMIZEBOX = 0x00020000;
     internal const uint WS_THICKFRAME = 0x00040000;

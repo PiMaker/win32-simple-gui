@@ -36,7 +36,7 @@ public class Window : IDisposable, ISizeProvider
         _width = width;
         _height = height;
         _self = GCHandle.Alloc(this);
-        Hwnd = NativeBindings.CreateWindowExW(0, ClassName, title,
+        Hwnd = NativeBindings.CreateWindowExW(NativeBindings.WS_EX_COMPOSITED, ClassName, title,
             NativeBindings.WS_OVERLAPPEDWINDOW | NativeBindings.WS_CLIPCHILDREN,
             NativeBindings.CW_USEDEFAULT, NativeBindings.CW_USEDEFAULT,
             Application.ScaleDip(width), Application.ScaleDip(height),

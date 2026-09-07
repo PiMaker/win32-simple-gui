@@ -172,6 +172,14 @@ public class Window : IDisposable, ISizeProvider
     // return true to proceed with the close
     public Func<bool> OnCloseRequest;
 
+    /// <summary>
+    /// Shows a message box attached to this window: the window is blocked while it is open
+    /// (clicks are rejected with the system ding), and the box closes with the window,
+    /// reporting as if the user cancelled.
+    /// </summary>
+    public bool MessageBox(string title, string message, Icon icon = null, MessageBoxIcon image = MessageBoxIcon.None, bool canCancel = true) =>
+        Application.ShowMessageBox(Hwnd, title, message, icon, image, canCancel);
+
     // thread-safe: the close request is posted to the window's owning thread
     public void Dispose()
     {

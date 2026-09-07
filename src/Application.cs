@@ -107,7 +107,10 @@ public static class Application
     /// When canCancel is false, only an OK button is shown.
     /// </summary>
     /// <returns>True if the user clicked OK; otherwise, false.</returns>
-    public static bool MessageBox(string title, string message, Icon icon = null, MessageBoxIcon image = MessageBoxIcon.None, bool canCancel = true)
+    public static bool MessageBox(string title, string message, Icon icon = null, MessageBoxIcon image = MessageBoxIcon.None, bool canCancel = true) =>
+        ShowMessageBox(0, title, message, icon, image, canCancel);
+
+    internal static bool ShowMessageBox(nint owner, string title, string message, Icon icon, MessageBoxIcon image, bool canCancel)
     {
         if (icon != null)
         {
@@ -115,7 +118,7 @@ public static class Application
             unsafe { _hook = NativeBindings.SetWindowsHookExW(NativeBindings.WH_CBT, (nint)(delegate* unmanaged<int, nint, nint, nint>)&CbtProc, 0, NativeBindings.GetCurrentThreadId()); }
         }
         uint buttons = canCancel ? NativeBindings.MB_OKCANCEL : NativeBindings.MB_OK;
-        int result = NativeBindings.MessageBoxW(0, message, title, buttons | (uint)image);
+        int result = NativeBindings.MessageBoxW(owner, message, title, buttons | (uint)image);
         if (_hook != 0)
         {
             NativeBindings.UnhookWindowsHookEx(_hook);

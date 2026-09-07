@@ -34,7 +34,7 @@ public class Example
         var nestedHorizontal = new HorizontalLayout { Width = BaseLayout.Fill, Height = 32, Margin = new(left: 8, right: 8, top: 4, bottom: 0), Spacing = 8 };
         var button = nestedHorizontal.Children.Add(new Button("Click Me") { Width = BaseLayout.Fill });
         var buttonDisabled = nestedHorizontal.Children.Add(new Button("Disabled") { Disabled = true, Width = BaseLayout.Fill });
-        button.OnClick += _ => Application.MessageBox("Button Clicked", $"You clicked the button! Input: {box.Text}", icon, MessageBoxIcon.Information, canCancel: false);
+        button.OnClick += _ => window.MessageBox("Button Clicked", $"You clicked the button! Input: {box.Text}", icon, MessageBoxIcon.Information, canCancel: false);
         layout.Children.Add(nestedHorizontal);
 
         // A ListBox with some selection logic

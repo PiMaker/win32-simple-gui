@@ -12,7 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Win32.SimpleGui.csproj" />
+    <ProjectReference Include="..\src\win32-simple-gui.csproj" />
+    <EmbeddedResource Include="icon.ico" />
   </ItemGroup>
 
 </Project>

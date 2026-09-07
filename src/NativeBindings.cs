@@ -270,6 +270,13 @@ internal static partial class NativeBindings
     [LibraryImport("kernel32.dll")]
     internal static partial uint GetCurrentThreadId();
 
+    [LibraryImport("user32.dll", SetLastError = true)]
+    internal static partial nint SetTimer(nint hwnd, nint id, uint intervalMilliseconds, nint procedure);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool KillTimer(nint hwnd, nint id);
+
     [LibraryImport("kernel32.dll")]
     internal static partial nint CreateActCtxW(ref ACTCTXW actctx);
 

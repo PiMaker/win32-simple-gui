@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 
 namespace Win32.SimpleGui;
 
@@ -20,6 +21,10 @@ public static class Application
 
     [ThreadStatic]
     private static bool _threadActivated;
+
+    private static readonly ConcurrentDictionary<nint, Func<bool>> _registeredTimers = new();
+    private static unsafe readonly nint _timerProc =
+        (nint)(delegate* unmanaged<nint, uint, nuint, uint, void>)&TimerProc;
 
     // DIP to pixel factor; 1 until EnableHiDPISupportForCurrentProcess runs
     internal static float Scale = 1f;
@@ -131,6 +136,45 @@ public static class Application
             _pendingIcon = null;
         }
         return NativeBindings.CallNextHookEx(0, code, wParam, lParam);
+    }
+
+    /// <summary>
+    /// Blocking call that runs the window's event loop until it closes.
+    /// </summary>
+    public static void RunEventLoop()
+    {
+        while (NativeBindings.GetMessageW(out var msg, 0, 0, 0) > 0)
+        {
+            NativeBindings.TranslateMessage(ref msg);
+            NativeBindings.DispatchMessageW(ref msg);
+            if (!Window.AnyElements) break;
+        }
+
+        foreach (var id in _registeredTimers.Keys) NativeBindings.KillTimer(0, id);
+        _registeredTimers.Clear();
+    }
+
+    /// <summary>
+    /// Schedule a Win32 timer to send WM_TIMER, `callback` runs on the thread that runs the event loop.
+    /// Schedule it from that thread (typically the UI thread).
+    /// If callback returns false, timer will be cancelled.
+    /// When all Windows close and `RunEventLoop` breaks, all timers are cancelled automatically.
+    /// </summary>
+    public static void ScheduleTimer(Func<bool> callback, uint intervalMilliseconds)
+    {
+        nint id = NativeBindings.SetTimer(0, 0, intervalMilliseconds, _timerProc);
+        if (id == 0) throw new InvalidOperationException("SetTimer failed.");
+        _registeredTimers[id] = callback;
+    }
+
+    [UnmanagedCallersOnly]
+    private static void TimerProc(nint hwnd, uint msg, nuint id, uint elapsed)
+    {
+        if (_registeredTimers.TryGetValue((nint)id, out var callback) && !callback())
+        {
+            if (_registeredTimers.TryRemove((nint)id, out _))
+                NativeBindings.KillTimer(0, (nint)id);
+        }
     }
 
     private const string Manifest =

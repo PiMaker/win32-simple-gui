@@ -11,6 +11,7 @@ public class Window : IDisposable, ISizeProvider
     private const string ClassName = "Win32.SimpleGui.Window";
 
     private static readonly ConcurrentDictionary<nint, Element> Elements = new();
+    public static bool AnyElements => !Elements.IsEmpty;
     private static bool _classRegistered;
 
     private readonly List<Element> _elements = new();
@@ -147,17 +148,6 @@ public class Window : IDisposable, ISizeProvider
 
     public Action OnResize;
     public bool AutoLayoutOnResize { get; set; } = true;
-
-    // blocking call that runs the window's event loop until it closes
-    public void RunEventLoop()
-    {
-        while (NativeBindings.GetMessageW(out var msg, 0, 0, 0) > 0)
-        {
-            NativeBindings.TranslateMessage(ref msg);
-            NativeBindings.DispatchMessageW(ref msg);
-            if (_closed) break;
-        }
-    }
 
     // thread-safe: the close request is posted to the window's owning thread
     public void Dispose()

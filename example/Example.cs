@@ -49,6 +49,12 @@ public class Example
         slider.OnValueChanged += (_, v) => sliderLabel.Text = $"Slider: {v}";
         layout.Children.Add(sliderLabel);
 
+        // Timer example, callback runs on UI thread
+        var timerLabel = layout.Children.Add(new Label("Timer: 0") { Background = Color.LightGreen });
+        var counterA = 0; var counterB = 0;
+        Application.ScheduleTimer(() => { timerLabel.Text = $"Timer: {++counterA} {counterB}"; return true; }, 1000);
+        Application.ScheduleTimer(() => { timerLabel.Text = $"Timer: {counterA} {++counterB}"; return true; }, 250);
+
         // Make all of them fill the available width of the VerticalLayout, which itself is set to Fill the root layout (Window) + Margin
         foreach (var child in layout.Children)
             child.Width = BaseLayout.Fill;
@@ -57,9 +63,9 @@ public class Example
         // This will recurse down into other layouts, if required
         window.Arrange();
 
-        // Blocking call to start the window's event loop
+        // Blocking call to start our event loop
         // You may call `window.Dispose` from any other thread (or in a callback) to close it and continue from here
-        window.RunEventLoop();
+        Application.RunEventLoop();
     }
 
     private static byte[] LoadEmbeddedIcon()

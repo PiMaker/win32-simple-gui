@@ -80,9 +80,9 @@ public abstract class ColorableElement : Element
     }
 }
 
-public class Rectangle : ColorableElement
+public class Panel : ColorableElement
 {
-    public Rectangle(int x, int y, int width, int height, Color color)
+    public Panel(int x, int y, int width, int height, Color color)
     {
         X = x;
         Y = y;

@@ -209,7 +209,7 @@ public class Window : IDisposable, ISizeProvider
 
         switch (element)
         {
-            case Rectangle:
+            case Panel:
                 className = "STATIC";
                 style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE;
                 break;

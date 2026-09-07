@@ -21,6 +21,8 @@ public class Window : IDisposable, ISizeProvider
     private Icon _icon;
     private int _width;
     private int _height;
+    private int _frameWidth;
+    private int _frameHeight;
     private bool _canMinimize = true;
     private bool _canMaximize = true;
     private bool _canResize = true;
@@ -44,6 +46,10 @@ public class Window : IDisposable, ISizeProvider
             _self.Free();
             throw new InvalidOperationException("CreateWindowExW failed.");
         }
+        MeasureFrame();
+        NativeBindings.SetWindowPos(Hwnd, 0, 0, 0,
+            Application.ScaleDip(width) + _frameWidth, Application.ScaleDip(height) + _frameHeight,
+            NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOZORDER);
         _rootLayout = new ManualLayout();
         Attach(_rootLayout);
         ApplyIcon();
@@ -68,23 +74,31 @@ public class Window : IDisposable, ISizeProvider
         }
     }
 
+    /// <summary>
+    /// Client area size in DIPs; element coordinates are client-relative DIPs.
+    /// The getter returns the achieved client size (may differ slightly from the set value).
+    /// </summary>
     public int Width
     {
         get => _width;
         set
         {
             _width = value;
-            if (Hwnd != 0) NativeBindings.SetWindowPos(Hwnd, 0, 0, 0, Application.ScaleDip(value), Application.ScaleDip(_height), NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOZORDER);
+            if (Hwnd != 0) NativeBindings.SetWindowPos(Hwnd, 0, 0, 0, Application.ScaleDip(value) + _frameWidth, Application.ScaleDip(_height) + _frameHeight, NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOZORDER);
         }
     }
 
+    /// <summary>
+    /// Client area size in DIPs; element coordinates are client-relative DIPs.
+    /// The getter returns the achieved client size (may differ slightly from the set value).
+    /// </summary>
     public int Height
     {
         get => _height;
         set
         {
             _height = value;
-            if (Hwnd != 0) NativeBindings.SetWindowPos(Hwnd, 0, 0, 0, Application.ScaleDip(_width), Application.ScaleDip(value), NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOZORDER);
+            if (Hwnd != 0) NativeBindings.SetWindowPos(Hwnd, 0, 0, 0, Application.ScaleDip(_width) + _frameWidth, Application.ScaleDip(value) + _frameHeight, NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOZORDER);
         }
     }
 
@@ -264,6 +278,16 @@ public class Window : IDisposable, ISizeProvider
         SetStyleBit(ref style, NativeBindings.WS_THICKFRAME, _canResize);
         NativeBindings.SetWindowLongPtrW(Hwnd, NativeBindings.GWL_STYLE, (nint)style);
         NativeBindings.SetWindowPos(Hwnd, 0, 0, 0, 0, 0, NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOSIZE | NativeBindings.SWP_NOZORDER | NativeBindings.SWP_NOACTIVATE | NativeBindings.SWP_FRAMECHANGED);
+        MeasureFrame();
+    }
+
+    // outer size minus client size, in pixels; depends on style and DPI
+    private void MeasureFrame()
+    {
+        NativeBindings.GetWindowRect(Hwnd, out var outer);
+        var (clientWidth, clientHeight) = NativeBindings.GetClientSize(Hwnd);
+        _frameWidth = (int)((outer.Right - outer.Left) - clientWidth);
+        _frameHeight = (int)((outer.Bottom - outer.Top) - clientHeight);
     }
 
     private static void SetStyleBit(ref uint style, uint bit, bool on)
@@ -275,10 +299,9 @@ public class Window : IDisposable, ISizeProvider
     private void OnSize(nint wParam)
     {
         if ((int)wParam == NativeBindings.SIZE_MINIMIZED) return;
-        NativeBindings.GetWindowRect(Hwnd, out var rect);
-        _width = (int)Math.Round((rect.Right - rect.Left) / Application.Scale);
-        _height = (int)Math.Round((rect.Bottom - rect.Top) / Application.Scale);
-        if (AutoLayoutOnResize) Arrange();
+        var (clientWidth, clientHeight) = NativeBindings.GetClientSize(Hwnd);
+        _width = (int)Math.Round(clientWidth / Application.Scale);
+        _height = (int)Math.Round(clientHeight / Application.Scale);
         OnResize?.Invoke();
     }
 

@@ -181,6 +181,7 @@ public class Window : IDisposable, ISizeProvider
         element.Hwnd = CreateControl(element);
         Elements[element.Hwnd] = element;
         NativeBindings.SendMessage(element.Hwnd, NativeBindings.WM_SETFONT, (element.Font ?? _font).Handle, 1);
+        if (element.Disabled) NativeBindings.EnableWindow(element.Hwnd, false);
         element.OnAttached();
     }
 
@@ -315,7 +316,7 @@ public class Window : IDisposable, ISizeProvider
     private void RouteCommand(nint wParam, nint lParam)
     {
         int code = (int)((wParam >> 16) & 0xFFFF);
-        if (!Elements.TryGetValue(lParam, out var element)) return;
+        if (!Elements.TryGetValue(lParam, out var element) || element.Disabled) return;
         switch (element)
         {
             case Button button when code == NativeBindings.BN_CLICKED:

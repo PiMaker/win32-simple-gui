@@ -15,6 +15,19 @@ public abstract class Element
     public Margin Margin { get; set; }
     public Font Font { get; set; }
 
+    private bool _disabled;
+
+    // no-ops for non-interactive elements (Label, Rectangle, ...)
+    public bool Disabled
+    {
+        get => _disabled;
+        set
+        {
+            _disabled = value;
+            if (Hwnd != 0) NativeBindings.EnableWindow(Hwnd, !value);
+        }
+    }
+
     // relative-to-root position and size assigned by the last Arrange pass
     public int AbsoluteX { get; internal set; }
     public int AbsoluteY { get; internal set; }

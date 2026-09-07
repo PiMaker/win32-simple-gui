@@ -28,6 +28,16 @@ public abstract class Element
         }
     }
 
+    public void BringToFront()
+    {
+        if (Hwnd != 0) NativeBindings.SetWindowPos(Hwnd, NativeBindings.HWND_TOP, 0, 0, 0, 0, NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOSIZE | NativeBindings.SWP_NOACTIVATE);
+    }
+
+    public void SendToBack()
+    {
+        if (Hwnd != 0) NativeBindings.SetWindowPos(Hwnd, NativeBindings.HWND_BOTTOM, 0, 0, 0, 0, NativeBindings.SWP_NOMOVE | NativeBindings.SWP_NOSIZE | NativeBindings.SWP_NOACTIVATE);
+    }
+
     // relative-to-root position and size assigned by the last Arrange pass
     public int AbsoluteX { get; internal set; }
     public int AbsoluteY { get; internal set; }

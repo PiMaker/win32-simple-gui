@@ -78,6 +78,7 @@ internal static partial class NativeBindings
     internal const uint WS_CHILD = 0x40000000;
     internal const uint WS_VISIBLE = 0x10000000;
     internal const uint WS_CLIPCHILDREN = 0x02000000;
+    internal const uint WS_CLIPSIBLINGS = 0x04000000;
     internal const uint WS_VSCROLL = 0x00200000;
     internal const uint WS_TABSTOP = 0x00010000;
     internal const uint WS_OVERLAPPEDWINDOW = 0x00CF0000;
@@ -94,6 +95,9 @@ internal static partial class NativeBindings
     internal const uint SWP_NOZORDER = 0x0004;
     internal const uint SWP_NOACTIVATE = 0x0010;
     internal const uint SWP_FRAMECHANGED = 0x0020;
+
+    internal static readonly nint HWND_TOP = 0;
+    internal static readonly nint HWND_BOTTOM = 1;
 
     internal const int WH_CBT = 5;
     internal const int HCBT_ACTIVATE = 5;

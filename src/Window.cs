@@ -212,7 +212,7 @@ public class Window : IDisposable, ISizeProvider
 
     private nint CreateControl(Element element)
     {
-        uint style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE | NativeBindings.WS_TABSTOP;
+        uint style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE | NativeBindings.WS_TABSTOP | NativeBindings.WS_CLIPSIBLINGS;
         uint exStyle = 0;
         string className;
         string text = element.TextValue ?? "";
@@ -225,7 +225,7 @@ public class Window : IDisposable, ISizeProvider
         {
             case Panel:
                 className = "STATIC";
-                style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE;
+                style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE | NativeBindings.WS_CLIPSIBLINGS;
                 break;
             case Label:
                 className = "STATIC";

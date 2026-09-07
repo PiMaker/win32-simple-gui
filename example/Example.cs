@@ -29,10 +29,13 @@ public class Example
         // Basic label
         layout.Children.Add(new Label("Hello, World!") { Foreground = Color.CornflowerBlue });
 
-        // TextBox, Button, and MessageBox helper - we can even put our Icon on the MessageBox
+        // TextBox, Button, nested layouts and MessageBox helper - we can even put our Icon on the MessageBox
         var box = layout.Children.Add(new TextBox());
-        var button = layout.Children.Add(new Button("Click Me") { Margin = new(horizontal: 16, vertical: 4) });
+        var nestedHorizontal = new HorizontalLayout { Width = BaseLayout.Fill, Height = 32, Margin = new(left: 8, right: 8, top: 4, bottom: 0), Spacing = 8 };
+        var button = nestedHorizontal.Children.Add(new Button("Click Me") { Width = BaseLayout.Fill });
+        var buttonDisabled = nestedHorizontal.Children.Add(new Button("Disabled") { Disabled = true, Width = BaseLayout.Fill });
         button.OnClick += _ => Application.MessageBox("Button Clicked", $"You clicked the button! Input: {box.Text}", icon, MessageBoxIcon.Information, canCancel: false);
+        layout.Children.Add(nestedHorizontal);
 
         // A ListBox with some selection logic
         var label = new Label("Select an item!");

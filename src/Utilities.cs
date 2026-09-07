@@ -55,6 +55,7 @@ public struct Margin(int left = 0, int top = 0, int right = 0, int bottom = 0)
     public int Bottom = bottom;
 
     public Margin(int horizontal = 0, int vertical = 0) : this(horizontal, vertical, horizontal, vertical) {}
+    public Margin(int all) : this(all, all, all, all) {}
 }
 
 public class Font : IDisposable

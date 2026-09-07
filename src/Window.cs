@@ -454,6 +454,7 @@ public class Window : IDisposable, ISizeProvider
                 break;
             case NativeBindings.WM_CTLCOLOREDIT when window != null:
             case NativeBindings.WM_CTLCOLORLISTBOX when window != null:
+            case NativeBindings.WM_CTLCOLORBTN when window != null:
             case NativeBindings.WM_CTLCOLORSTATIC when window != null:
                 return window.ControlColor(wParam, lParam);
             case NativeBindings.WM_CLOSE when window != null:

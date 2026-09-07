@@ -72,6 +72,7 @@ internal static partial class NativeBindings
     internal const uint WM_COMMAND = 0x0111;
     internal const uint WM_CTLCOLOREDIT = 0x0133;
     internal const uint WM_CTLCOLORLISTBOX = 0x0134;
+    internal const uint WM_CTLCOLORBTN = 0x0135;
     internal const uint WM_HSCROLL = 0x0114;
     internal const uint WM_CTLCOLORSTATIC = 0x0138;
 

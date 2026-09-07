@@ -139,7 +139,7 @@ public class TextBox : ColorableElement
     public Action<TextBox, string> OnTextChanged;
 }
 
-public class Checkbox : Element
+public class Checkbox : ColorableElement
 {
     public Checkbox(string text = "")
     {

@@ -52,8 +52,8 @@ public class Example
         // Timer example, callback runs on UI thread
         var timerLabel = layout.Children.Add(new Label("Timer: 0") { Background = Color.LightGreen });
         var counterA = 0; var counterB = 0;
-        Application.ScheduleTimer(() => { timerLabel.Text = $"Timer: {++counterA} {counterB}"; return true; }, 1000);
-        Application.ScheduleTimer(() => { timerLabel.Text = $"Timer: {counterA} {++counterB}"; return true; }, 250);
+        Application.ScheduleTimer(() => timerLabel.Text = $"Timer: {++counterA} {counterB}", 1000);
+        Application.ScheduleTimer(() => { timerLabel.Text = $"Timer: {counterA} {++counterB}"; return counterB < 100; }, 250);
 
         // Make all of them fill the available width of the VerticalLayout, which itself is set to Fill the root layout (Window) + Margin
         foreach (var child in layout.Children)

@@ -157,8 +157,16 @@ public static class Application
     /// <summary>
     /// Schedule a Win32 timer to send WM_TIMER, `callback` runs on the thread that runs the event loop.
     /// Schedule it from that thread (typically the UI thread).
-    /// If callback returns false, timer will be cancelled.
     /// When all Windows close and `RunEventLoop` breaks, all timers are cancelled automatically.
+    /// </summary>
+    public static void ScheduleTimer(Action callback, uint intervalMilliseconds)
+    {
+        ScheduleTimer(() => { callback(); return true; }, intervalMilliseconds);
+    }
+
+    /// <summary>
+    /// See ScheduleTimer(Action callback, uint intervalMilliseconds).
+    /// If Func<bool> callback returns false, timer will be cancelled.
     /// </summary>
     public static void ScheduleTimer(Func<bool> callback, uint intervalMilliseconds)
     {

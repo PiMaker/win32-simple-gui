@@ -163,6 +163,9 @@ public class Window : IDisposable, ISizeProvider
     public Action OnResize;
     public bool AutoLayoutOnResize { get; set; } = true;
 
+    // return true to proceed with the close
+    public Func<bool> OnCloseRequest;
+
     // thread-safe: the close request is posted to the window's owning thread
     public void Dispose()
     {
@@ -422,7 +425,9 @@ public class Window : IDisposable, ISizeProvider
             case NativeBindings.WM_CTLCOLORLISTBOX when window != null:
             case NativeBindings.WM_CTLCOLORSTATIC when window != null:
                 return window.ControlColor(wParam, lParam);
-            case NativeBindings.WM_CLOSE:
+            case NativeBindings.WM_CLOSE when window != null:
+                if (window.OnCloseRequest != null && !window.OnCloseRequest())
+                    return 0;
                 NativeBindings.DestroyWindow(hwnd);
                 return 0;
             case NativeBindings.WM_DESTROY when window != null:

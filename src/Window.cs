@@ -214,7 +214,7 @@ public class Window : IDisposable, ISizeProvider
         element.OnAttached();
     }
 
-    internal void Detach(Element element)
+    internal void Detach(int index, Element element)
     {
         if (!element.Attached) return;
         element.Attached = false;
@@ -224,7 +224,7 @@ public class Window : IDisposable, ISizeProvider
             layout.Children.Added -= Attach;
             layout.Children.Removed -= Detach;
             layout.Children.Set -= OnChildSet;
-            foreach (var child in layout.Children) Detach(child);
+            for (int i = layout.Children.Count - 1; i >= 0; i--) Detach(i, layout.Children[i]);
             return;
         }
         if (element.Hwnd != 0)
@@ -238,7 +238,7 @@ public class Window : IDisposable, ISizeProvider
 
     private void OnChildSet(int index, Element oldElement, Element newElement)
     {
-        Detach(oldElement);
+        Detach(index, oldElement);
         Attach(newElement);
     }
 

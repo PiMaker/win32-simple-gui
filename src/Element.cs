@@ -276,9 +276,8 @@ public class ListBox : ColorableElement
 
     private void OnItemAdded(string item) => NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, item);
 
-    private void OnItemRemoved(string item)
+    private void OnItemRemoved(int index, string _)
     {
-        int index = Items.IndexOf(item);
         if (index >= 0) NativeBindings.SendMessage(Hwnd, NativeBindings.LB_DELETESTRING, index);
     }
 

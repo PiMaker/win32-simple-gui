@@ -7,7 +7,7 @@ public class ObservableList<T> : IEnumerable<T>
     private readonly List<T> _items = new();
 
     public Action<T> Added;
-    public Action<T> Removed;
+    public Action<int, T> Removed;
     public Action<int, T, T> Set;
 
     public int Count => _items.Count;
@@ -32,20 +32,23 @@ public class ObservableList<T> : IEnumerable<T>
 
     public bool Remove(T item)
     {
-        if (!_items.Remove(item)) return false;
-        Removed?.Invoke(item);
+        int index = _items.IndexOf(item);
+        if (index < 0) return false;
+        _items.RemoveAt(index);
+        Removed?.Invoke(index, item);
         return true;
     }
 
     public void Clear()
     {
         if (_items.Count == 0) return;
-        var snapshot = _items.ToArray();
-        _items.Clear();
-        foreach (var item in snapshot) Removed?.Invoke(item);
+        for (int i = _items.Count - 1; i >= 0; i--)
+        {
+            var item = _items[i];
+            _items.RemoveAt(i);
+            Removed?.Invoke(i, item);
+        }
     }
-
-    public int IndexOf(T item) => _items.IndexOf(item);
 
     public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

@@ -287,7 +287,7 @@ public class ListBox : ColorableElement
         int selected = SelectedIndex;
         SuppressSelectionEvent = true;
         NativeBindings.SendMessage(Hwnd, NativeBindings.LB_DELETESTRING, index);
-        NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_INSERTSTRING, 0, item);
+        NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_INSERTSTRING, index, item);
         if (selected == index) NativeBindings.SendMessage(Hwnd, NativeBindings.LB_SETCURSEL, index);
         SuppressSelectionEvent = false;
     }

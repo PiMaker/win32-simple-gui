@@ -10,7 +10,7 @@ Look, it won't be pretty, but it's the Laziest™ and "Simplest" way to add a GU
 
 ### Example App
 
-See [Example.cs](example/Example.cs). 72 LoC with comments & whitespace, 1.1 MB AOT binary. Looks like this:
+See [Example.cs](example/Example.cs). About 80 LoC with comments & whitespace, 1.1 MB AOT binary. Looks like this:
 
 ![Screenshot of Example.cs](example/screenshot.jpg)
 

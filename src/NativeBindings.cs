@@ -197,6 +197,10 @@ internal static partial class NativeBindings
     [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
     internal static partial int MessageBoxW(nint hwnd, string text, string caption, uint type);
 
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool MessageBeep(uint type);
+
     [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool SetWindowTextW(nint hwnd, string text);

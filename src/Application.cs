@@ -152,6 +152,13 @@ public static class Application
     }
 
     /// <summary>
+    /// Plays the system sound matching the given message box icon: Error, Warning,
+    /// Information, Question, or the default beep for None. Non-blocking; the sound
+    /// plays asynchronously. Fire-and-forget, no return value.
+    /// </summary>
+    public static void PlaySound(MessageBoxIcon sound) => NativeBindings.MessageBeep((uint)sound);
+
+    /// <summary>
     /// Blocking call that runs the window's event loop until it closes.
     /// </summary>
     public static void RunEventLoop()

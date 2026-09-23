@@ -46,9 +46,11 @@ public class Example
         layout.Children.Add(label);
 
         // A Slider from 0-100 (default) that drives a label
+        // Uses non-allocating TextBuffer API
+        var text = new TextBuffer(16);
         var slider = layout.Children.Add(new Slider());
         var sliderLabel = new Label("Slider: 0") { Background = Color.LightSalmon };
-        slider.OnValueChanged += (_, v) => sliderLabel.Text = $"Slider: {v}";
+        slider.OnValueChanged += (_, v) => sliderLabel.SetTextNoAlloc(text.Set($"Slider:").Append($" {v}"));
         layout.Children.Add(sliderLabel);
 
         // Timer example, callback runs on UI thread

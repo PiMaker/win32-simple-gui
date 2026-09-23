@@ -166,6 +166,8 @@ public class TextBox : ColorableElement
     }
 
     public string Text { get => GetText(); set => SetText(value); }
+    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
+    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
 
     public Action<TextBox, string> OnTextChanged;
 }

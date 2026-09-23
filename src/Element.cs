@@ -6,7 +6,7 @@ public abstract class Element
 {
     internal nint Hwnd;
     internal bool Attached;
-    internal string TextValue = "";
+    internal string TextInitState = "";
 
     public int X { get; set; }
     public int Y { get; set; }
@@ -44,12 +44,32 @@ public abstract class Element
     public int AbsoluteWidth { get; internal set; }
     public int AbsoluteHeight { get; internal set; }
 
-    protected string GetText() => Hwnd != 0 ? NativeBindings.GetWindowText(Hwnd) : TextValue;
+    protected string GetText() => Hwnd != 0 ? NativeBindings.GetWindowText(Hwnd) : TextInitState;
 
     protected void SetText(string value)
     {
-        TextValue = value ?? "";
-        if (Hwnd != 0) NativeBindings.SetWindowTextW(Hwnd, TextValue);
+        TextInitState = value ?? "";
+        if (Hwnd != 0) NativeBindings.SetWindowTextW(Hwnd, TextInitState);
+    }
+
+    protected unsafe void SetTextNoAlloc(TextBuffer value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        if (Hwnd == 0) throw new InvalidOperationException("Element is not attached to a window.");
+        fixed (char* text = value.RawBuffer) NativeBindings.SetWindowTextWNoAlloc(Hwnd, text);
+    }
+
+    protected unsafe void GetTextNoAlloc(TextBuffer buffer)
+    {
+        ArgumentNullException.ThrowIfNull(buffer);
+        if (Hwnd == 0) throw new InvalidOperationException("Element is not attached to a window.");
+        fixed (char* text = buffer.RawBuffer)
+            buffer.RawSetCount(NativeBindings.GetWindowTextW(Hwnd, (nint)text, buffer.Capacity + 1));
+    }
+
+    internal void SyncTextInitState()
+    {
+        if (Hwnd != 0) TextInitState = GetText();
     }
 
     internal virtual void OnAttached() { }
@@ -106,7 +126,7 @@ public class Label : ColorableElement
 {
     public Label(string text = "", bool centerHorizontally = false, bool centerVertically = false)
     {
-        TextValue = text;
+        TextInitState = text;
         Width = 200;
         Height = 20;
 
@@ -119,17 +139,21 @@ public class Label : ColorableElement
     public bool CenterVertically { get; }
 
     public string Text { get => GetText(); set => SetText(value); }
+    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
+    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
 }
 
 public class Button : Element
 {
     public Button(string text = "")
     {
-        TextValue = text;
+        TextInitState = text;
         Height = 28;
     }
 
     public string Text { get => GetText(); set => SetText(value); }
+    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
+    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
 
     public Action<Button> OnClick;
 }
@@ -150,12 +174,14 @@ public class Checkbox : ColorableElement
 {
     public Checkbox(string text = "")
     {
-        TextValue = text;
+        TextInitState = text;
         Width = 120;
         Height = 20;
     }
 
     public string Text { get => GetText(); set => SetText(value); }
+    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
+    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
 
     public bool Checked
     {

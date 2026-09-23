@@ -229,6 +229,7 @@ public class Window : IDisposable, ISizeProvider
         }
         if (element.Hwnd != 0)
         {
+            element.SyncTextInitState();
             Elements.TryRemove(element.Hwnd, out _);
             NativeBindings.DestroyWindow(element.Hwnd);
             element.Hwnd = 0;
@@ -247,7 +248,7 @@ public class Window : IDisposable, ISizeProvider
         uint style = NativeBindings.WS_CHILD | NativeBindings.WS_VISIBLE | NativeBindings.WS_TABSTOP | NativeBindings.WS_CLIPSIBLINGS;
         uint exStyle = 0;
         string className;
-        string text = element.TextValue ?? "";
+        string text = element.TextInitState ?? "";
         int x = element.X == BaseLayout.Fill ? 0 : element.X;
         int y = element.Y == BaseLayout.Fill ? 0 : element.Y;
         int width = element.Width == BaseLayout.Fill ? 0 : element.Width;
@@ -346,6 +347,7 @@ public class Window : IDisposable, ISizeProvider
         foreach (var element in _elements)
         {
             element.Attached = false;
+            element.SyncTextInitState();
             if (element.Hwnd != 0) Elements.TryRemove(element.Hwnd, out _);
             element.Hwnd = 0;
             if (element is BaseLayout layout)

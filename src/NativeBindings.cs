@@ -205,6 +205,10 @@ internal static partial class NativeBindings
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool SetWindowTextW(nint hwnd, string text);
 
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowTextW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static unsafe partial bool SetWindowTextWNoAlloc(nint hwnd, char* text);
+
     [LibraryImport("user32.dll")]
     internal static partial int GetWindowTextW(nint hwnd, nint buffer, int max);
 

@@ -22,6 +22,7 @@ public class Example
         // Spawn a Window with the given size and default font
         var window = new Window("Example Window", 280, 380, fontUI, icon);
         window.CanMaximize = false;
+        window.Background = Color.White;
 
         // Window has a ManualLayout as the root, we add a vertical stack panel
         var layout = new VerticalLayout { Width = BaseLayout.Fill, Height = BaseLayout.Fill, Margin = new(left: 8, right: 8, top: 8, bottom: 6) };

@@ -63,6 +63,7 @@ internal struct ACTCTXW
 
 internal static partial class NativeBindings
 {
+    internal const uint WM_ERASEBKGND = 0x0014;
     internal const uint WM_SIZE = 0x0005;
     internal const uint WM_DESTROY = 0x0002;
     internal const uint WM_CLOSE = 0x0010;
@@ -70,6 +71,7 @@ internal static partial class NativeBindings
     internal const uint WM_SETFONT = 0x0030;
     internal const uint WM_NCCREATE = 0x0081;
     internal const uint WM_COMMAND = 0x0111;
+    internal const uint WM_PRINTCLIENT = 0x0318;
     internal const uint WM_CTLCOLOREDIT = 0x0133;
     internal const uint WM_CTLCOLORLISTBOX = 0x0134;
     internal const uint WM_CTLCOLORBTN = 0x0135;
@@ -321,6 +323,9 @@ internal static partial class NativeBindings
 
     [LibraryImport("gdi32.dll")]
     internal static partial nint CreateSolidBrush(uint color);
+
+    [LibraryImport("user32.dll")]
+    internal static partial int FillRect(nint hdc, in RECT rect, nint brush);
 
     [LibraryImport("gdi32.dll")]
     internal static partial uint SetTextColor(nint hdc, uint color);

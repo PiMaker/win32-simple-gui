@@ -27,6 +27,8 @@ public class Window : IDisposable, ISizeProvider
     private bool _canMaximize = true;
     private bool _canResize = true;
     private bool _closed;
+    private Color _background;
+    private nint _backgroundBrush;
 
     public Window(string title, int width, int height, Font font, Icon icon = null)
     {
@@ -65,6 +67,25 @@ public class Window : IDisposable, ISizeProvider
             NativeBindings.DwmSetWindowAttribute(Hwnd, NativeBindings.DWMWA_USE_IMMERSIVE_DARK_MODE, ref on, sizeof(int));
         }
     }
+
+    /// <summary>
+    /// Client background color. Color.Empty keeps the system default.
+    /// Transparent children (e.g. Slider) and elements without their own Background inherit this.
+    /// </summary>
+    public Color Background
+    {
+        get => _background;
+        set
+        {
+            _background = value;
+            if (_backgroundBrush != 0) NativeBindings.DeleteObject(_backgroundBrush);
+            _backgroundBrush = 0;
+            if (Hwnd != 0) NativeBindings.InvalidateRect(Hwnd, 0, true);
+        }
+    }
+
+    internal nint BackgroundBrush => _backgroundBrush != 0 ? _backgroundBrush
+        : _backgroundBrush = _background == Color.Empty ? 0 : NativeBindings.CreateSolidBrush(ColorableElement.ToColorRef(_background));
 
     public string Title
     {
@@ -365,6 +386,8 @@ public class Window : IDisposable, ISizeProvider
             element.OnDetached();
         }
         _elements.Clear();
+        if (_backgroundBrush != 0) NativeBindings.DeleteObject(_backgroundBrush);
+        _backgroundBrush = 0;
         NativeBindings.SetWindowLongPtrW(Hwnd, NativeBindings.GWLP_USERDATA, 0);
         _self.Free();
         _self = default;
@@ -408,7 +431,21 @@ public class Window : IDisposable, ISizeProvider
                 return colorable.BackgroundBrush;
             }
         }
+        if (BackgroundBrush != 0)
+        {
+            NativeBindings.SetBkMode(hdc, NativeBindings.TRANSPARENT);
+            return BackgroundBrush;
+        }
         return NativeBindings.COLOR_WINDOW + 1;
+    }
+
+    // WM_ERASEBKGND / WM_PRINTCLIENT (sent by transparent children via DrawThemeParentBackground)
+    private bool PaintBackground(nint hdc)
+    {
+        if (BackgroundBrush == 0) return false;
+        NativeBindings.GetClientRect(Hwnd, out var rect);
+        NativeBindings.FillRect(hdc, in rect, BackgroundBrush);
+        return true;
     }
 
     private static Window FromHwnd(nint hwnd)
@@ -462,6 +499,10 @@ public class Window : IDisposable, ISizeProvider
             case NativeBindings.WM_HSCROLL when window != null:
                 window.RouteScroll(lParam);
                 break;
+            case NativeBindings.WM_ERASEBKGND when window != null && window.PaintBackground(wParam):
+                return 1;
+            case NativeBindings.WM_PRINTCLIENT when window != null && window.PaintBackground(wParam):
+                return 0;
             case NativeBindings.WM_CTLCOLOREDIT when window != null:
             case NativeBindings.WM_CTLCOLORLISTBOX when window != null:
             case NativeBindings.WM_CTLCOLORBTN when window != null:

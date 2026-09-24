@@ -92,6 +92,14 @@ public class TextBuffer
             _buffer._count += written;
             _buffer._buffer[_buffer._count] = '\0';
         }
+
+        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable
+        {
+            if (!value.TryFormat(_buffer._buffer.AsSpan(_buffer._count, _buffer.Capacity - _buffer._count), out int written, format, null))
+                throw new ArgumentOutOfRangeException(nameof(value), "New length exceeds TextBuffer capacity.");
+            _buffer._count += written;
+            _buffer._buffer[_buffer._count] = '\0';
+        }
     }
 
     [InterpolatedStringHandler]
@@ -109,5 +117,6 @@ public class TextBuffer
         public void AppendFormatted(string value) => _append.AppendFormatted(value);
         public void AppendFormatted(char value) => _append.AppendFormatted(value);
         public void AppendFormatted<T>(T value) where T : ISpanFormattable => _append.AppendFormatted(value);
+        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable => _append.AppendFormatted(value, format);
     }
 }

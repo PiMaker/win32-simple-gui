@@ -112,6 +112,7 @@ internal static partial class NativeBindings
     internal const uint SS_LEFT = 0x00000000;
     internal const uint SS_CENTER = 0x00000001;
     internal const uint SS_RIGHT = 0x00000002;
+    internal const uint SS_NOTIFY = 0x00000100;
     internal const uint SS_CENTERIMAGE = 0x00000200;
     internal const uint ES_AUTOHSCROLL = 0x00000080;
     internal const uint LBS_NOTIFY = 0x0001;
@@ -139,6 +140,7 @@ internal static partial class NativeBindings
     internal const uint PBM_SETRANGE32 = 0x0406;
 
     internal const int BN_CLICKED = 0;
+    internal const int STN_CLICKED = 0;
     internal const int LBN_SELCHANGE = 1;
     internal const int EN_CHANGE = 0x0300;
 

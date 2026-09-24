@@ -179,6 +179,8 @@ public class Label : ColorableTextElement
 
     public Alignment Alignment { get; }
     public bool CenterVertically { get; }
+
+    public Action<Label> OnClick;
 }
 
 public class Button : TextElement

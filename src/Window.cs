@@ -290,6 +290,7 @@ public class Window : IDisposable, ISizeProvider
                     _ => NativeBindings.SS_LEFT,
                 };
                 if (label.CenterVertically) style |= NativeBindings.SS_CENTERIMAGE;
+                style |= NativeBindings.SS_NOTIFY;
                 break;
             case Button:
                 className = "BUTTON";
@@ -399,6 +400,9 @@ public class Window : IDisposable, ISizeProvider
         if (!Elements.TryGetValue(lParam, out var element) || element.Disabled) return;
         switch (element)
         {
+            case Label label when code == NativeBindings.STN_CLICKED:
+                label.OnClick?.Invoke(label);
+                break;
             case Button button when code == NativeBindings.BN_CLICKED:
                 button.OnClick?.Invoke(button);
                 break;

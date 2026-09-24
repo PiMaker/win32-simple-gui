@@ -173,20 +173,24 @@ public class TextBuffer : IObservableElement, IEquatable<TextBuffer>
 
         public StaticInterpolatedStringHandler(int literalLength, int formattedCount)
         {
-            if (!_threadBuffer.IsValueCreated)
-                _threadBuffer.Value = new TextBuffer((int)BitOperations.RoundUpToPowerOf2((uint)literalLength) * 2);
+            var expectedCapacity = ExpectedCapacity(literalLength);
+            if (!_threadBuffer.IsValueCreated || _threadBuffer.Value.Capacity < expectedCapacity)
+                _threadBuffer.Value = new TextBuffer(expectedCapacity);
 
             _buffer = _threadBuffer.Value;
+            _buffer.Clear();
         }
 
-        public void AppendLiteral(string value) => _buffer.Set($"{value}");
-        public void AppendFormatted(string value) => _buffer.Set($"{value}");
-        public void AppendFormatted(TextBuffer value) => _buffer.Set($"{value}");
-        public void AppendFormatted<T>(T value) where T : ISpanFormattable => _buffer.Set($"{value}");
+        private static int ExpectedCapacity(int literalLength) => Math.Max(128, (int)BitOperations.RoundUpToPowerOf2((uint)literalLength) * 2);
 
+        public void AppendLiteral(string value) => _buffer.Append($"{value}");
+        public void AppendFormatted(string value) => _buffer.Append($"{value}");
+        public void AppendFormatted(TextBuffer value) => _buffer.Append($"{value}");
+        public void AppendFormatted<T>(T value) where T : ISpanFormattable => _buffer.Append($"{value}");
+
+        // can't forward `format` parameter, so need to open code it :(
         public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable
         {
-            // can't forward `format` parameter, so need to open code it :(
             if (!value.TryFormat(_buffer._buffer.AsSpan(_buffer._count, _buffer.Capacity - _buffer._count), out int written, format, null))
                 throw new ArgumentOutOfRangeException(nameof(value), "New length exceeds TextBuffer capacity.");
             _buffer._count += written;

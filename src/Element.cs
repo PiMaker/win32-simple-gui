@@ -5,7 +5,7 @@ namespace Win32.SimpleGui;
 
 public abstract class Element : IObservableElement
 {
-    public event Action<IObservableElement> Changed; // does not need to be called, Window handles notifications anyway
+    event Action<IObservableElement> IObservableElement.Changed { add {} remove {} } // does not need to be called, Window handles notifications anyway
 
     internal nint Hwnd;
     internal bool Attached;

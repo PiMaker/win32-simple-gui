@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Win32.SimpleGui;
 
-public class TextBuffer : IObservableElement
+public class TextBuffer : IObservableElement, IEquatable<TextBuffer>
 {
     public event Action<IObservableElement> Changed;
 
@@ -83,6 +83,30 @@ public class TextBuffer : IObservableElement
     }
 
     public override string ToString() => new(_buffer, 0, _count);
+    public override int GetHashCode()
+    {
+        int hash = 17;
+        for (int i = 0; i < _count; i++)
+            hash = hash * 31 + _buffer[i].GetHashCode();
+        return hash;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not TextBuffer other) return false;
+        return Equals(other);
+    }
+
+    public bool Equals(TextBuffer other)
+    {
+        if (other == null) return false;
+        if (_count != other._count) return false;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_buffer[i] != other._buffer[i]) return false;
+        }
+        return true;
+    }
 
     [InterpolatedStringHandler]
     public readonly struct AppendInterpolatedStringHandler

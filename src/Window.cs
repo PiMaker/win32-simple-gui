@@ -284,6 +284,7 @@ public class Window : IDisposable, ISizeProvider
                 break;
             case Slider:
                 className = "msctls_trackbar32";
+                style |= NativeBindings.TBS_TRANSPARENTBKGND;
                 break;
             case ProgressBar:
                 className = "msctls_progress32";

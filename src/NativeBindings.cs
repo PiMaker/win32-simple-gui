@@ -128,6 +128,7 @@ internal static partial class NativeBindings
     internal const uint LB_SETCURSEL = 0x0186;
     internal const uint LB_GETCURSEL = 0x0188;
 
+    internal const uint TBS_TRANSPARENTBKGND = 0x1000;
     internal const uint TBM_GETPOS = 0x0400;
     internal const uint TBM_SETPOS = 0x0405;
     internal const uint TBM_SETRANGE = 0x0406;

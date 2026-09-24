@@ -1,12 +1,14 @@
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace Win32.SimpleGui;
 
-public abstract class Element
+public abstract class Element : IObservableElement
 {
+    public event Action<IObservableElement> Changed; // does not need to be called, Window handles notifications anyway
+
     internal nint Hwnd;
     internal bool Attached;
-    internal string TextInitState = "";
 
     public int X { get; set; }
     public int Y { get; set; }
@@ -44,12 +46,17 @@ public abstract class Element
     public int AbsoluteWidth { get; internal set; }
     public int AbsoluteHeight { get; internal set; }
 
-    protected string GetText() => Hwnd != 0 ? NativeBindings.GetWindowText(Hwnd) : TextInitState;
+#region Text Helpers
 
-    protected void SetText(string value)
+    protected virtual int TextLength { get; set; }
+    internal string TextInitState
     {
-        TextInitState = value ?? "";
-        if (Hwnd != 0) NativeBindings.SetWindowTextW(Hwnd, TextInitState);
+        get;
+        set
+        {
+            field = value;
+            TextLength = value?.Length ?? 0;
+        }
     }
 
     protected unsafe void SetTextNoAlloc(TextBuffer value)
@@ -57,6 +64,7 @@ public abstract class Element
         ArgumentNullException.ThrowIfNull(value);
         if (Hwnd == 0) throw new InvalidOperationException("Element is not attached to a window.");
         fixed (char* text = value.RawBuffer) NativeBindings.SetWindowTextWNoAlloc(Hwnd, text);
+        TextLength = value.Count;
     }
 
     protected unsafe void GetTextNoAlloc(TextBuffer buffer)
@@ -69,8 +77,15 @@ public abstract class Element
 
     internal void SyncTextInitState()
     {
-        if (Hwnd != 0) TextInitState = GetText();
+        if (Hwnd != 0)
+        {
+            var buffer = new TextBuffer(TextLength);
+            GetTextNoAlloc(buffer);
+            TextInitState = buffer.ToString();
+        }
     }
+
+#endregion
 
     internal virtual void OnAttached() { }
     internal virtual void OnDetached() { }
@@ -110,6 +125,33 @@ public abstract class ColorableElement : Element
     }
 }
 
+public abstract class TextElement : Element
+{
+    public void SetText(TextBuffer buffer) => SetTextNoAlloc(buffer);
+    public void SetText([InterpolatedStringHandlerArgument] TextBuffer.StaticInterpolatedStringHandler handler) => SetText(handler.ActiveBuffer);
+    public void GetText(TextBuffer buffer) => GetTextNoAlloc(buffer);
+    public TextBuffer GetText()
+    {
+        var buffer = new TextBuffer(TextLength);
+        GetTextNoAlloc(buffer);
+        return buffer;
+    }
+}
+
+// I want traits -.-
+public abstract class ColorableTextElement : ColorableElement
+{
+    public void SetText(TextBuffer buffer) => SetTextNoAlloc(buffer);
+    public void SetText([InterpolatedStringHandlerArgument] TextBuffer.StaticInterpolatedStringHandler handler) => SetText(handler.ActiveBuffer);
+    public void GetText(TextBuffer buffer) => GetTextNoAlloc(buffer);
+    public TextBuffer GetText()
+    {
+        var buffer = new TextBuffer(TextLength);
+        GetTextNoAlloc(buffer);
+        return buffer;
+    }
+}
+
 public class Panel : ColorableElement
 {
     public Panel(int x, int y, int width, int height, Color color)
@@ -122,7 +164,7 @@ public class Panel : ColorableElement
     }
 }
 
-public class Label : ColorableElement
+public class Label : ColorableTextElement
 {
     public Label(string text = "", Alignment alignment = Alignment.Left, bool centerVertically = false)
     {
@@ -137,13 +179,9 @@ public class Label : ColorableElement
 
     public Alignment Alignment { get; }
     public bool CenterVertically { get; }
-
-    public string Text { get => GetText(); set => SetText(value); }
-    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
-    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
 }
 
-public class Button : Element
+public class Button : TextElement
 {
     public Button(string text = "")
     {
@@ -151,28 +189,23 @@ public class Button : Element
         Height = 28;
     }
 
-    public string Text { get => GetText(); set => SetText(value); }
-    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
-    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
-
     public Action<Button> OnClick;
 }
 
-public class TextBox : ColorableElement
+public class TextBox : ColorableTextElement
 {
     public TextBox()
     {
         Width = 200;
     }
 
-    public string Text { get => GetText(); set => SetText(value); }
-    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
-    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
+    public Action<TextBox, TextBuffer> OnTextChanged;
 
-    public Action<TextBox, string> OnTextChanged;
+    // actual text length is user input, this specifies max buffer size
+    protected override int TextLength { get => 4096; set {} }
 }
 
-public class Checkbox : ColorableElement
+public class Checkbox : ColorableTextElement
 {
     public Checkbox(string text = "")
     {
@@ -180,10 +213,6 @@ public class Checkbox : ColorableElement
         Width = 120;
         Height = 20;
     }
-
-    public string Text { get => GetText(); set => SetText(value); }
-    public new void SetTextNoAlloc(TextBuffer text) => base.SetTextNoAlloc(text);
-    public new void GetTextNoAlloc(TextBuffer buffer) => base.GetTextNoAlloc(buffer);
 
     public bool Checked
     {
@@ -271,7 +300,7 @@ public class ListBox : ColorableElement
         Height = 120;
     }
 
-    public ObservableList<string> Items { get; } = new();
+    public ObservableList<TextBuffer> Items { get; } = new();
 
     public int SelectedIndex
     {
@@ -286,13 +315,17 @@ public class ListBox : ColorableElement
 
     internal bool SuppressSelectionEvent;
 
-    internal override void OnAttached()
+    internal override unsafe void OnAttached()
     {
         if (Application.DarkModeEnabled) NativeBindings.SetWindowTheme(Hwnd, "DarkMode_Explorer", null);
         Items.Added += OnItemAdded;
         Items.Removed += OnItemRemoved;
         Items.Set += OnItemSet;
-        foreach (var item in Items) NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, item);
+        foreach (var item in Items)
+        {
+            fixed (char* pItem = item.RawBuffer)
+                NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, (IntPtr)pItem);
+        }
     }
 
     internal override void OnDetached()
@@ -302,20 +335,25 @@ public class ListBox : ColorableElement
         Items.Set -= OnItemSet;
     }
 
-    private void OnItemAdded(string item) => NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, item);
+    private unsafe void OnItemAdded(TextBuffer item)
+    {
+        fixed (char* pItem = item.RawBuffer)
+            NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_ADDSTRING, 0, (IntPtr)pItem);
+    }
 
-    private void OnItemRemoved(int index, string _)
+    private void OnItemRemoved(int index, TextBuffer _)
     {
         if (index >= 0) NativeBindings.SendMessage(Hwnd, NativeBindings.LB_DELETESTRING, index);
     }
 
     // delete+insert repaints only the affected row; keep the selection without firing selection events
-    private void OnItemSet(int index, string _, string item)
+    private unsafe void OnItemSet(int index, TextBuffer _, TextBuffer item)
     {
         int selected = SelectedIndex;
         SuppressSelectionEvent = true;
         NativeBindings.SendMessage(Hwnd, NativeBindings.LB_DELETESTRING, index);
-        NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_INSERTSTRING, index, item);
+        fixed (char* pItem = item.RawBuffer)
+            NativeBindings.SendMessageW(Hwnd, NativeBindings.LB_INSERTSTRING, index, (IntPtr)pItem);
         if (selected == index) NativeBindings.SendMessage(Hwnd, NativeBindings.LB_SETCURSEL, index);
         SuppressSelectionEvent = false;
     }

@@ -2,7 +2,13 @@ using System.Collections;
 
 namespace Win32.SimpleGui;
 
+public interface IObservableElement
+{
+    public event Action<IObservableElement> Changed;
+}
+
 public class ObservableList<T> : IEnumerable<T>
+    where T: IObservableElement
 {
     private readonly List<T> _items = new();
 
@@ -18,14 +24,25 @@ public class ObservableList<T> : IEnumerable<T>
         set
         {
             T old = _items[index];
+            old.Changed -= OnElementChanged;
             _items[index] = value;
+            value.Changed += OnElementChanged;
             Set?.Invoke(index, old, value);
         }
+    }
+
+    public T Add(T item)
+    {
+        _items.Add(item);
+        item.Changed += OnElementChanged;
+        Added?.Invoke(item);
+        return item;
     }
 
     public TItem Add<TItem>(TItem item) where TItem : T
     {
         _items.Add(item);
+        item.Changed += OnElementChanged;
         Added?.Invoke(item);
         return item;
     }
@@ -34,6 +51,7 @@ public class ObservableList<T> : IEnumerable<T>
     {
         int index = _items.IndexOf(item);
         if (index < 0) return false;
+        item.Changed -= OnElementChanged;
         _items.RemoveAt(index);
         Removed?.Invoke(index, item);
         return true;
@@ -45,8 +63,22 @@ public class ObservableList<T> : IEnumerable<T>
         for (int i = _items.Count - 1; i >= 0; i--)
         {
             var item = _items[i];
+            item.Changed -= OnElementChanged;
             _items.RemoveAt(i);
             Removed?.Invoke(i, item);
+        }
+    }
+
+    private void OnElementChanged(IObservableElement item)
+    {
+        if (item is T typed)
+        {
+            int index = _items.IndexOf(typed);
+            if (index >= 0) Set?.Invoke(index, typed, typed);
+        }
+        else
+        {
+            throw new InvalidOperationException($"Item of type {item.GetType()} called Changed callback for type {typeof(T)}.");
         }
     }
 

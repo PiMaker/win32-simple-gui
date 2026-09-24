@@ -341,14 +341,6 @@ internal static partial class NativeBindings
 
     internal static nint SendMessage(nint hwnd, uint msg, nint wParam = 0, nint lParam = 0) => SendMessageW(hwnd, msg, wParam, lParam);
 
-    internal static unsafe string GetWindowText(nint hwnd)
-    {
-        const int max = 512;
-        char* buffer = stackalloc char[max];
-        GetWindowTextW(hwnd, (nint)buffer, max);
-        return new string(buffer);
-    }
-
     internal static (int Width, int Height) GetClientSize(nint hwnd)
     {
         GetClientRect(hwnd, out var rect);

@@ -35,29 +35,27 @@ public class Example
         var nestedHorizontal = new HorizontalLayout { Width = BaseLayout.Fill, Height = 32, Margin = new(left: 8, right: 8, top: 4, bottom: 0), Spacing = 8 };
         var button = nestedHorizontal.Children.Add(new Button("Click Me") { Width = BaseLayout.Fill });
         var buttonDisabled = nestedHorizontal.Children.Add(new Button("Disabled") { Disabled = true, Width = BaseLayout.Fill });
-        button.OnClick += _ => window.MessageBox("Button Clicked", $"You clicked the button! Input: {box.Text}", icon, MessageBoxIcon.Information, canCancel: false);
+        button.OnClick += _ => window.MessageBox("Button Clicked", $"You clicked the button! Input: {box.GetText()}", icon, MessageBoxIcon.Information, canCancel: false);
         layout.Children.Add(nestedHorizontal);
 
         // A ListBox with some selection logic
         var label = new Label("Select an item!");
         var list = layout.Children.Add(new ListBox() { Height = BaseLayout.Fill, Font = fontMono });
-        for (int i = 0; i < 12; i++) list.Items.Add($"Item {i + 1}");
-        list.OnSelectedIndexChanged += (_, i) => label.Text = i >= 0 ? $"Selected: {list.Items[i]}" : "Select an item!";
+        for (int i = 0; i < 12; i++) list.Items.Add(new($"Item {i + 1}"));
+        list.OnSelectedIndexChanged += (_, i) => { if (i >= 0) label.SetText($"Selected: {list.Items[i]}"); else label.SetText($"Select an item!"); };
         layout.Children.Add(label);
 
         // A Slider from 0-100 (default) that drives a label
-        // Uses non-allocating TextBuffer API
-        var text = new TextBuffer(16);
         var slider = layout.Children.Add(new Slider());
         var sliderLabel = new Label("Slider: 0 %", Alignment.Right) { Background = Color.LightSalmon };
-        slider.OnValueChanged += (_, v) => sliderLabel.SetTextNoAlloc(text.Set($"Slider:").Append($" {v*0.01:P0}"));
+        slider.OnValueChanged += (_, v) => sliderLabel.SetText($"Slider: {v*0.01:P0}"); // no-alloc interpolation!
         layout.Children.Add(sliderLabel);
 
         // Timer example, callback runs on UI thread
         var timerLabel = layout.Children.Add(new Label("Timer: 0") { Background = Color.LightGreen });
         var counterA = 0; var counterB = 0;
-        Application.ScheduleTimer(() => timerLabel.Text = $"Timer: {++counterA} {counterB}", 1000);
-        Application.ScheduleTimer(() => { timerLabel.Text = $"Timer: {counterA} {++counterB}"; return counterB < 100; }, 250);
+        Application.ScheduleTimer(() => timerLabel.SetText($"Timer: {++counterA} {counterB}"), 1000);
+        Application.ScheduleTimer(() => { timerLabel.SetText($"Timer: {counterA} {++counterB}"); return counterB < 100; }, 250);
 
         // Make all of them fill the available width of the VerticalLayout, which itself is set to Fill the root layout (Window) + Margin
         foreach (var child in layout.Children)

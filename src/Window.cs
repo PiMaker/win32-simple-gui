@@ -68,7 +68,7 @@ public class Window : IDisposable, ISizeProvider
 
     public string Title
     {
-        get => Hwnd != 0 ? NativeBindings.GetWindowText(Hwnd) : "";
+        //get => Hwnd != 0 ? NativeBindings.GetWindowText(Hwnd) : "";
         set
         {
             if (Hwnd != 0) NativeBindings.SetWindowTextW(Hwnd, value);
@@ -382,7 +382,7 @@ public class Window : IDisposable, ISizeProvider
                 checkbox.OnCheckedChanged?.Invoke(checkbox, checkbox.Checked);
                 break;
             case TextBox textBox when code == NativeBindings.EN_CHANGE:
-                textBox.OnTextChanged?.Invoke(textBox, textBox.Text);
+                textBox.OnTextChanged?.Invoke(textBox, textBox.GetText());
                 break;
             case ListBox listBox when code == NativeBindings.LBN_SELCHANGE && !listBox.SuppressSelectionEvent:
                 listBox.OnSelectedIndexChanged?.Invoke(listBox, listBox.SelectedIndex);

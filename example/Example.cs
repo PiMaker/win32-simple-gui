@@ -65,6 +65,9 @@ public class Example
         // This will recurse down into other layouts, if required
         window.Arrange();
 
+        // ListBox works by reference!
+        list.Items[3].Set($"Item Test!");
+
         // Blocking call to start our event loop
         // You may call `window.Dispose` from any other thread (or in a callback) to close it and continue from here
         Application.RunEventLoop();

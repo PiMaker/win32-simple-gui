@@ -60,6 +60,13 @@ public interface ISizeProvider
     int ClientHeight { get; }
 }
 
+public enum Alignment
+{
+    Left,
+    Center,
+    Right,
+}
+
 public struct Margin(int left = 0, int top = 0, int right = 0, int bottom = 0)
 {
     public int Left = left;

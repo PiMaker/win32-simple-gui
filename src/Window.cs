@@ -262,7 +262,12 @@ public class Window : IDisposable, ISizeProvider
                 break;
             case Label label:
                 className = "STATIC";
-                if (label.CenterHorizontally) style |= NativeBindings.SS_CENTER;
+                style |= label.Alignment switch
+                {
+                    Alignment.Center => NativeBindings.SS_CENTER,
+                    Alignment.Right => NativeBindings.SS_RIGHT,
+                    _ => NativeBindings.SS_LEFT,
+                };
                 if (label.CenterVertically) style |= NativeBindings.SS_CENTERIMAGE;
                 break;
             case Button:

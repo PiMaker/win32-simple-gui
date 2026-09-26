@@ -129,7 +129,15 @@ public class TextBuffer : IObservableElement, IEquatable<TextBuffer>
             _buffer._buffer[_buffer._count] = '\0';
         }
 
-        public void AppendFormatted<T>(T value) where T : ISpanFormattable
+        public void AppendFormatted(ReadOnlySpan<char> value)
+        {
+            if (value.Length > _buffer.Capacity - _buffer._count) throw new ArgumentOutOfRangeException(nameof(value), "New length exceeds TextBuffer capacity.");
+            value.CopyTo(_buffer._buffer.AsSpan(_buffer._count));
+            _buffer._count += value.Length;
+            _buffer._buffer[_buffer._count] = '\0';
+        }
+
+        public void AppendFormatted<T>(T value) where T : ISpanFormattable, allows ref struct
         {
             if (!value.TryFormat(_buffer._buffer.AsSpan(_buffer._count, _buffer.Capacity - _buffer._count), out int written, default, null))
                 throw new ArgumentOutOfRangeException(nameof(value), "New length exceeds TextBuffer capacity.");
@@ -137,7 +145,7 @@ public class TextBuffer : IObservableElement, IEquatable<TextBuffer>
             _buffer._buffer[_buffer._count] = '\0';
         }
 
-        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable
+        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable, allows ref struct
         {
             if (!value.TryFormat(_buffer._buffer.AsSpan(_buffer._count, _buffer.Capacity - _buffer._count), out int written, format, null))
                 throw new ArgumentOutOfRangeException(nameof(value), "New length exceeds TextBuffer capacity.");
@@ -160,8 +168,9 @@ public class TextBuffer : IObservableElement, IEquatable<TextBuffer>
         public void AppendLiteral(string value) => _append.AppendLiteral(value);
         public void AppendFormatted(string value) => _append.AppendFormatted(value);
         public void AppendFormatted(TextBuffer value) => _append.AppendFormatted(value);
-        public void AppendFormatted<T>(T value) where T : ISpanFormattable => _append.AppendFormatted(value);
-        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable => _append.AppendFormatted(value, format);
+        public void AppendFormatted(ReadOnlySpan<char> value) => _append.AppendFormatted(value);
+        public void AppendFormatted<T>(T value) where T : ISpanFormattable, allows ref struct => _append.AppendFormatted(value);
+        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable, allows ref struct => _append.AppendFormatted(value, format);
     }
 
     [InterpolatedStringHandler]
@@ -186,10 +195,11 @@ public class TextBuffer : IObservableElement, IEquatable<TextBuffer>
         public void AppendLiteral(string value) => _buffer.Append($"{value}");
         public void AppendFormatted(string value) => _buffer.Append($"{value}");
         public void AppendFormatted(TextBuffer value) => _buffer.Append($"{value}");
-        public void AppendFormatted<T>(T value) where T : ISpanFormattable => _buffer.Append($"{value}");
+        public void AppendFormatted(ReadOnlySpan<char> value) => _buffer.Append($"{value}");
+        public void AppendFormatted<T>(T value) where T : ISpanFormattable, allows ref struct => _buffer.Append($"{value}");
 
         // can't forward `format` parameter, so need to open code it :(
-        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable
+        public void AppendFormatted<T>(T value, ReadOnlySpan<char> format) where T : ISpanFormattable, allows ref struct
         {
             if (!value.TryFormat(_buffer._buffer.AsSpan(_buffer._count, _buffer.Capacity - _buffer._count), out int written, format, null))
                 throw new ArgumentOutOfRangeException(nameof(value), "New length exceeds TextBuffer capacity.");
